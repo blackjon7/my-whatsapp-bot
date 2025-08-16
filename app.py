@@ -62,3 +62,20 @@ def send_whatsapp_message(to, message):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
+
+import gspread
+from google.oauth2.service_account import Credentials
+from datetime import datetime
+
+# Configuración Google Sheets
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+creds = Credentials.from_service_account_file("credentials.json", scopes=SCOPES)
+client = gspread.authorize(creds)
+
+SHEET_ID = "TU_HOJA_ID"
+sheet = client.open_by_key(SHEET_ID).sheet1
+
+def guardar_en_sheets(numero, mensaje, respuesta):
+    fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    sheet.append_row([fecha, numero, mensaje, respuesta])
+
