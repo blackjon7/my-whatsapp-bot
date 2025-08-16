@@ -42,6 +42,39 @@ def webhook():
 
     return jsonify({"status": "ok"}), 200
 
+@app.route("/webhook", methods=["GET", "POST"])
+def webhook():
+    if request.method == "GET":
+        # Verificación de Meta
+        mode = request.args.get("hub.mode")
+        token = request.args.get("hub.verify_token")
+        challenge = request.args.get("hub.challenge")
+
+        if mode == "subscribe" and token == VERIFY_TOKEN:
+            return challenge, 200
+        else:
+            return "Error de verificación", 403
+
+    elif request.method == "POST":
+        # Aquí procesamos los mensajes entrantes
+        data = request.get_json()
+        print("Evento entrante:", data)
+
+        # Extraer información del mensaje
+        mensaje_usuario = data["entry"][0]["changes"][0]["value"]["messages"][0]["text"]["body"]
+        numero = data["entry"][0]["changes"][0]["value"]["messages"][0]["from"]
+
+        # Respuesta con OpenAI
+        respuesta = responder_mensaje(mensaje_usuario)
+
+        # Guardar en Google Sheets
+        guardar_en_sheets(numero, mensaje_usuario, respuesta)
+
+        # Enviar la respuesta por WhatsApp
+        enviar_whatsapp(numero, respuesta)
+
+        return "EVENT_RECEIVED", 200
+
 
 # Función para enviar mensajes de vuelta a WhatsApp
 def send_whatsapp_message(to, message):
@@ -78,5 +111,6 @@ sheet = client.open_by_key(SHEET_ID).sheet1
 def guardar_en_sheets(numero, mensaje, respuesta):
     fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     sheet.append_row([fecha, numero, mensaje, respuesta])
+
 
 
