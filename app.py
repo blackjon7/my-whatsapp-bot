@@ -72,10 +72,11 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 creds = Credentials.from_service_account_file("credentials.json", scopes=SCOPES)
 client = gspread.authorize(creds)
 
-SHEET_ID = "TU_HOJA_ID"
+SHEET_ID = "1wanP530LIQdJYm32uZVmvRhxCns-d4j59c5Mx_zZoCs"
 sheet = client.open_by_key(SHEET_ID).sheet1
 
 def guardar_en_sheets(numero, mensaje, respuesta):
     fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     sheet.append_row([fecha, numero, mensaje, respuesta])
+
 
